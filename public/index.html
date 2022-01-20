@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload</title>
+    <style>
+        body {
+            margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .result {
+            position: relative;
+            display: flex;
+            justify-items: start;
+            width: 100%;
+            height: 150px;
+            margin: 10px 5px;
+        }
+
+        .result img {
+            margin-right: 10px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="upload">
+        <input type="file" name="file-input" id="image" accept="image/*">
+        <button id="upload-btn">Upload</button>
+        <p id="message"></p>
+        <div class="result" id="result">
+            <!-- <img src="/photo/61e9258c437e3cd73c7ca74a"> -->
+        </div>
+    </div>
+    <script>
+        let inputImg = document.getElementById("image");
+        let uploadBtn = document.getElementById("upload-btn")
+        let imageSrc = "";
+        let imageName = "";
+        inputImg.addEventListener("change", async (e) => {
+            console.log(e.target.files[0]);
+            imageSrc = await this.toBase64(event.target.files[0]);
+            imageName = e.target.files[0].name;
+        })
+        uploadBtn.addEventListener("click", async (e) => {
+            if (imageSrc) {
+                const formData = new FormData();
+                formData.append("name", imageName);
+                formData.append("data", imageSrc);
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            let newEl = document.createElement('img');
+                            newEl.src = '/photo/' + result.imgId;
+                            newEl.style = 'width:120px';
+                            document.getElementById('result').append(newEl);
+                            document.getElementById('message').innerHTML = 'Upload successful';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('message').innerHTML = 'Upload failed';
+                    });
+            }
+        })
+        function htmlToElement(html) {
+            var template = document.createElement("template");
+            html = html.trim(); // Never return a text node of whitespace as the result
+            template.innerHTML = html;
+            return template.content.firstChild;
+        }
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+            });
+        }
+    </script>
+</body>
+
+</html>
