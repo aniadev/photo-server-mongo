@@ -87,6 +87,17 @@ app.post('/upload', upload.none(), async (req, res) => {
 app.get('/upload', (req, res) => {
   res.sendFile('./public/index.html', { root: __dirname });
 });
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Photo Server Api',
+    api: {
+      upload: '/upload',
+      view: '/photo/:id',
+      getRawData: '/api/photo/:id',
+    },
+  });
+});
 
 app.listen(process.env.PORT || port, () =>
   console.log(`App listening on port ${process.env.PORT || port}!`)
